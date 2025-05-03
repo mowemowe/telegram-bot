@@ -13,6 +13,10 @@ game_active = False
 scores = {}
 
 def start(update: Update, context: CallbackContext):
+    # Reklamı silmək üçün Telegram profil təsvirlərini sıfırla
+    context.bot.set_my_description(description="")
+    context.bot.set_my_short_description(short_description="")
+
     keyboard = [
         [InlineKeyboardButton("Oyuna başla", callback_data='play')],
         [InlineKeyboardButton("Qrupa əlavə et", url=f"https://t.me/{context.bot.username}?startgroup=true")]
