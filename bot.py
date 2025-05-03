@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Bot tokenin
-TOKEN = '8121790668:AAGgnuGVklk7-yhOIWuBWalWfg9NhA9DXjY'
+TOKEN = '8121790668:AAGsCTKLkA3H7O78AWimvNhnIAE5Eoo92vY'
 
 WORDS = ['alma', 'banana', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
 
