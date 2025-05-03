@@ -13,7 +13,7 @@ game_active = False
 scores = {}
 
 def start(update: Update, context: CallbackContext):
-    # Reklamı silmək üçün Telegram profil təsvirlərini sıfırla
+    # Reklamı sil
     context.bot.set_my_description(description="")
     context.bot.set_my_short_description(short_description="")
 
@@ -22,10 +22,20 @@ def start(update: Update, context: CallbackContext):
         [InlineKeyboardButton("Qrupa əlavə et", url=f"https://t.me/{context.bot.username}?startgroup=true")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(
-        "Salam! Mən söz tapma oyun botuyam!\n\nKomandalar:\n/play - Oyuna başla\n/stop - Dayandır\n/status - Vəziyyət\n/top - Xal cədvəli",
-        reply_markup=reply_markup
+
+    text = (
+        "Salam! Mən söz tapma oyun botuyam!\n\n"
+        "Komandalar:\n"
+        "/play - Oyuna başla\n"
+        "/stop - Dayandır\n"
+        "/status - Vəziyyət\n"
+        "/top - Xal cədvəli"
     )
+
+    if update.message:
+        update.message.reply_text(text, reply_markup=reply_markup)
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=reply_markup)
 
 def button(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -50,7 +60,6 @@ def play(update: Update, context: CallbackContext):
 
         timer = threading.Timer(10.0, timeout)
         timer.start()
-
     else:
         update.message.reply_text("Oyun artıq aktivdir! Əvvəlcə /stop yazıb dayandırın.")
 
