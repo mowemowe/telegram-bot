@@ -4,7 +4,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 
 TOKEN = '8121790668:AAGsCTKLkA3H7O78AWimvNhnIAE5Eoo92vY'
 
-WORDS = ['alma', 'söhbət', 'banana', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
+WORDS = ['alma', 'söhbət', 'dünya', 'duman', 'sari', 'hamster', 'qurbaqa', 'saat', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
 target_word = None
 last_word = None
 game_active = False
