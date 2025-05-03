@@ -2,21 +2,30 @@ import random
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-# Bot tokenin
 TOKEN = '8121790668:AAGsCTKLkA3H7O78AWimvNhnIAE5Eoo92vY'
 
-WORDS = ['alma', 'söhbət', 'dünya', 'eşq', 'milyaner', 'duman' , 'hamster', 'sari', 'saat', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
-
+WORDS = ['alma', 'söhbət', 'banana', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
 target_word = None
+last_word = None
 game_active = False
 scores = {}
-inactivity_timer = None  # 10 dəqiqəlik susqunluq taymeri
+inactivity_timer = None
+
+def get_new_word():
+    global last_word
+    if len(WORDS) == 1:
+        return WORDS[0]
+    new_word = random.choice(WORDS)
+    while new_word == last_word:
+        new_word = random.choice(WORDS)
+    last_word = new_word
+    return new_word
 
 def start(update: Update, context: CallbackContext):
     global target_word, game_active
     if not game_active:
         game_active = True
-        target_word = random.choice(WORDS)
+        target_word = get_new_word()
         update.message.reply_text(f"Tez tap: '{target_word}' sözünü ən birinci yaz!")
         reset_inactivity_timer(update, context)
     else:
@@ -54,14 +63,21 @@ def top(update: Update, context: CallbackContext):
 
 def check_message(update: Update, context: CallbackContext):
     global target_word, game_active
-    if game_active and update.message.text.lower() == target_word.lower():
+    if not game_active:
+        return
+
+    user_text = update.message.text.strip().lower()
+    if user_text == target_word.lower():
         user = update.message.from_user
         name = user.first_name
         user_id = user.id
         scores[user_id] = scores.get(user_id, 0) + 1
         update.message.reply_text(f"Təbriklər, {name} qazandı!\nÜmumi xalların: {scores[user_id]}")
-        target_word = random.choice(WORDS)
+        target_word = get_new_word()
         update.message.reply_text(f"Növbəti söz: '{target_word}'")
+    else:
+        update.message.reply_text("Yanlışdır! Sözü düz yaz!")
+
     reset_inactivity_timer(update, context)
 
 def stop_due_to_inactivity(context: CallbackContext):
