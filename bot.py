@@ -28,9 +28,10 @@ def stop(update: Update, context: CallbackContext):
         game_active = False
         if inactivity_timer:
             inactivity_timer.schedule_removal()
-        update.message.reply_text("Oyun dayandırıldı.")
+            inactivity_timer = None
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Oyun dayandırıldı.")
     else:
-        update.message.reply_text("Hazırda aktiv oyun yoxdur.")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Hazırda aktiv oyun yoxdur.")
 
 def status(update: Update, context: CallbackContext):
     if game_active:
