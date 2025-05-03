@@ -71,8 +71,8 @@ def main():
     updater = Updater(TOKEN)
     dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("stop", stop))
+    dp.add_handler(CommandHandler("Başla", start))
+    dp.add_handler(CommandHandler("Saxla", stop))
     dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("top", top))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_message))
