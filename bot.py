@@ -1,7 +1,7 @@
 import random
 import threading
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Bot tokenin
 TOKEN = '8121790668:AAGgnuGVklk7-yhOIWuBWalWfg9NhA9DXjY'
@@ -13,38 +13,7 @@ game_active = False
 scores = {}
 
 def start(update: Update, context: CallbackContext):
-    # Reklamı sil
-    context.bot.set_my_description(description="")
-    context.bot.set_my_short_description(short_description="")
-
-    keyboard = [
-        [InlineKeyboardButton("Oyuna başla", callback_data='play')],
-        [InlineKeyboardButton("Qrupa əlavə et", url=f"https://t.me/{context.bot.username}?startgroup=true")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    text = (
-        "Salam! Mən söz tapma oyun botuyam!\n\n"
-        "Komandalar:\n"
-        "/play - Oyuna başla\n"
-        "/stop - Dayandır\n"
-        "/status - Vəziyyət\n"
-        "/top - Xal cədvəli"
-    )
-
-    # Universal cavab
-    context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=reply_markup)
-
-def button(update: Update, context: CallbackContext):
-    query = update.callback_query
-    query.answer()
-
-    if query.data == 'play':
-        context.bot.send_message(chat_id=query.message.chat.id, text="/play")
-
-def play(update: Update, context: CallbackContext):
     global target_word, game_active
-
     if not game_active:
         target_word = random.choice(WORDS)
         game_active = True
@@ -103,8 +72,6 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CallbackQueryHandler(button))
-    dp.add_handler(CommandHandler("play", play))
     dp.add_handler(CommandHandler("stop", stop))
     dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("top", top))
