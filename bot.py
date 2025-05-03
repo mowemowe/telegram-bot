@@ -6,7 +6,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 # Bot tokenin
 TOKEN = '8121790668:AAGsCTKLkA3H7O78AWimvNhnIAE5Eoo92vY'
 
-WORDS = ['alma', 'banana', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
+WORDS = ['alma', 'söhbət', 'banana', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
 
 target_word = None
 game_active = False
@@ -71,8 +71,8 @@ def main():
     updater = Updater(TOKEN)
     dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler("Başla", start))
-    dp.add_handler(CommandHandler("Saxla", stop))
+    dp.add_handler(CommandHandler("basla", start))
+    dp.add_handler(CommandHandler("saxla", stop))
     dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("top", top))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_message))
