@@ -32,10 +32,8 @@ def start(update: Update, context: CallbackContext):
         "/top - Xal cədvəli"
     )
 
-    if update.message:
-        update.message.reply_text(text, reply_markup=reply_markup)
-    else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=reply_markup)
+    # Universal cavab
+    context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=reply_markup)
 
 def button(update: Update, context: CallbackContext):
     query = update.callback_query
