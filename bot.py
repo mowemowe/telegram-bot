@@ -1,6 +1,5 @@
 import random
-import threading
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Bot tokenin
@@ -11,29 +10,24 @@ WORDS = ['alma', 'söhbət', 'banana', 'gülümsəyən üz', 'top', 'uçan quş'
 target_word = None
 game_active = False
 scores = {}
+inactivity_timer = None  # 10 dəqiqəlik susqunluq taymeri
 
 def start(update: Update, context: CallbackContext):
     global target_word, game_active
     if not game_active:
-        target_word = random.choice(WORDS)
         game_active = True
+        target_word = random.choice(WORDS)
         update.message.reply_text(f"Tez tap: '{target_word}' sözünü ən birinci yaz!")
-
-        def timeout():
-            global game_active
-            if game_active:
-                game_active = False
-                update.message.reply_text("Vaxt bitdi! Heç kim doğru cavab vermədi.")
-
-        timer = threading.Timer(10.0, timeout)
-        timer.start()
+        reset_inactivity_timer(update, context)
     else:
-        update.message.reply_text("Oyun artıq aktivdir! Əvvəlcə /stop yazıb dayandırın.")
+        update.message.reply_text("Oyun artıq aktivdir! Əvvəlcə /saxla yazıb dayandırın.")
 
 def stop(update: Update, context: CallbackContext):
-    global game_active
+    global game_active, inactivity_timer
     if game_active:
         game_active = False
+        if inactivity_timer:
+            inactivity_timer.schedule_removal()
         update.message.reply_text("Oyun dayandırıldı.")
     else:
         update.message.reply_text("Hazırda aktiv oyun yoxdur.")
@@ -65,10 +59,23 @@ def check_message(update: Update, context: CallbackContext):
         user_id = user.id
         scores[user_id] = scores.get(user_id, 0) + 1
         update.message.reply_text(f"Təbriklər, {name} qazandı!\nÜmumi xalların: {scores[user_id]}")
-        game_active = False
+        target_word = random.choice(WORDS)
+        update.message.reply_text(f"Növbəti söz: '{target_word}'")
+    reset_inactivity_timer(update, context)
+
+def stop_due_to_inactivity(context: CallbackContext):
+    global game_active
+    game_active = False
+    context.bot.send_message(chat_id=context.job.context, text="10 dəqiqə heç kim yazmadı, oyun avtomatik dayandırıldı.")
+
+def reset_inactivity_timer(update: Update, context: CallbackContext):
+    global inactivity_timer
+    if inactivity_timer:
+        inactivity_timer.schedule_removal()
+    inactivity_timer = context.job_queue.run_once(stop_due_to_inactivity, 600, context=update.effective_chat.id)
 
 def main():
-    updater = Updater(TOKEN)
+    updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("basla", start))
