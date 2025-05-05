@@ -8,7 +8,7 @@ WORDS = ['alma', 'çətir', 'kompyuter', 'pəncərə', 'dəftər', 'açar', 'oyu
          'qələm', 'divar', 'telefon', 'çay', 'ayna', 'kitabxana', 'dəli', 'kəpənək', 'sevgi', 'bulud', 'ulduz',
          'əjdaha', 'səssizlik', 'canavar', 'pozan', 'kalkulyator', 'aşçıabbasaşasmışasmışsadaazasmış', 'zəka',
          'təhlükə', 'kölgə', 'robot', 'baki', 'samirlə qurban', 'söhbət', 'dünya', 'duman', 'sari', 'hamster',
-         'qurbaqa', 'saat', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
+         'qurbaqa', 'saat', 'səy', 'balaca', 'ördək', 'gülmə ağır ol', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
 
 game_active = {}
 target_words = {}
@@ -59,7 +59,7 @@ def top(update: Update, context: CallbackContext):
         update.message.reply_text("Hələ heç kim xal qazanmayıb.")
         return
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    leaderboard = "Xal cədvəli:\n"
+    leaderboard = "Xal cədvəli:
 "
     for i, (user_id, score) in enumerate(sorted_scores, 1):
         user = context.bot.get_chat_member(update.effective_chat.id, user_id).user
@@ -76,7 +76,8 @@ def check_message(update: Update, context: CallbackContext):
     if user_text == target_words.get(chat_id, "").lower():
         user = update.message.from_user
         scores[user.id] = scores.get(user.id, 0) + 1
-        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user.id]}")
+        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!
+Ümumi xalların: {scores[user.id]}")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
         update.message.reply_text(f"Növbəti söz: '{word}'")
