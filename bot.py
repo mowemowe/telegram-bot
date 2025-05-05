@@ -8,7 +8,7 @@ WORDS = ['alma', 'çətir', 'kompyuter', 'pəncərə', 'dəftər', 'açar', 'oyu
          'qələm', 'divar', 'telefon', 'çay', 'ayna', 'kitabxana', 'dəli', 'kəpənək', 'sevgi', 'bulud', 'ulduz',
          'əjdaha', 'səssizlik', 'canavar', 'pozan', 'kalkulyator', 'aşçıabbasaşasmışasmışsadaazasmış', 'zəka',
          'təhlükə', 'kölgə', 'robot', 'baki', 'samirlə qurban', 'söhbət', 'dünya', 'duman', 'sari', 'hamster',
-         'qurbaqa', 'saat', 'səy', 'balaca', 'ördək', 'gülmə ağır ol', 'gülümsəyən üz', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
+         'qurbaqa', 'saat', 'gülümsə', 'zor', 'sual', 'top', 'uçan quş', 'raket', 'kitab', 'pizza', 'göz', 'dəvə']
 
 game_active = {}
 target_words = {}
@@ -29,7 +29,6 @@ def start(update: Update, context: CallbackContext):
     text = update.message.text.lower()
     if any(bad in text for bad in ["vpn", "bit.ly", "t.me/vpn", "http", "https"]):
         return
-
     if not game_active.get(chat_id, False):
         game_active[chat_id] = True
         word = get_new_word(chat_id)
@@ -59,25 +58,21 @@ def top(update: Update, context: CallbackContext):
         update.message.reply_text("Hələ heç kim xal qazanmayıb.")
         return
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    leaderboard = "Xal cədvəli:
-"
+    leaderboard = "Xal cədvəli:\n"
     for i, (user_id, score) in enumerate(sorted_scores, 1):
         user = context.bot.get_chat_member(update.effective_chat.id, user_id).user
-        leaderboard += f"{i}. {user.first_name} — {score} xal
-"
+        leaderboard += f"{i}. {user.first_name} — {score} xal\n"
     update.message.reply_text(leaderboard)
 
 def check_message(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     if not game_active.get(chat_id, False):
         return
-
     user_text = update.message.text.strip().lower()
     if user_text == target_words.get(chat_id, "").lower():
         user = update.message.from_user
         scores[user.id] = scores.get(user.id, 0) + 1
-        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!
-Ümumi xalların: {scores[user.id]}")
+        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user.id]}")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
         update.message.reply_text(f"Növbəti söz: '{word}'")
@@ -99,13 +94,11 @@ def reset_inactivity_timer(update: Update, context: CallbackContext):
 def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
-
     dp.add_handler(CommandHandler("basla", start))
     dp.add_handler(CommandHandler("saxla", stop))
     dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("top", top))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_message))
-
     updater.start_polling()
     updater.idle()
 
