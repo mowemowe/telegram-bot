@@ -76,8 +76,7 @@ def check_message(update: Update, context: CallbackContext):
     if user_text == target_words.get(chat_id, "").lower():
         user = update.message.from_user
         scores[user.id] = scores.get(user.id, 0) + 1
-        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!
-Ümumi xalların: {scores[user.id]}")
+        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user.id]}")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
         update.message.reply_text(f"Növbəti söz: '{word}'")
