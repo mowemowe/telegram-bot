@@ -59,7 +59,7 @@ def top(update: Update, context: CallbackContext):
         update.message.reply_text("Hələ heç kim xal qazanmayıb.")
         return
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    leaderboard = "Xal cədvəli:\n"
+    leaderboard = "Xal cədvəli:
 "
     for i, (user_id, score) in enumerate(sorted_scores, 1):
         user = context.bot.get_chat_member(update.effective_chat.id, user_id).user
