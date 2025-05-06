@@ -15,7 +15,7 @@ target_words = {}
 last_words = {}
 scores = {}
 inactivity_timers = {}
-stats = {}  # user_id: [ümumi oyun sayı, düzgün cavab sayı]
+stats = {}  # chat_id: {user_id: [ümumi oyun sayı, düzgün cavab sayı]}
 
 def get_new_word(chat_id):
     last_word = last_words.get(chat_id)
@@ -66,13 +66,25 @@ def top(update: Update, context: CallbackContext):
     update.message.reply_text(leaderboard)
 
 def show_stats(update: Update, context: CallbackContext):
-    user_id = update.message.from_user.id
-    if user_id not in stats:
-        update.message.reply_text("Hələ heç bir oyunda iştirak etməmisən.")
+    chat_id = update.effective_chat.id
+    if chat_id not in stats or not stats[chat_id]:
+        update.message.reply_text("Bu söhbətdə hələ heç kim iştirak etməyib.")
         return
-    total, correct = stats[user_id]
-    percent = int((correct / total) * 100) if total > 0 else 0
-    update.message.reply_text(f"Oyun sayı: {total}\nDüzgün cavab: {correct}\nDəqiqlik: {percent}%")
+
+    user_stats = stats[chat_id]
+    sorted_stats = sorted(user_stats.items(), key=lambda x: x[1][1], reverse=True)
+
+    text = "📊 *Qrup Statistikası:*\n"
+    for i, (user_id, (total, correct)) in enumerate(sorted_stats, 1):
+        percent = int((correct / total) * 100) if total > 0 else 0
+        try:
+            user = context.bot.get_chat_member(chat_id, user_id).user
+            name = user.first_name
+        except:
+            name = f"ID:{user_id}"
+        text += f"{i}. {name} — {correct} düzgün / {total} cəmi ({percent}%)\n"
+
+    update.message.reply_text(text, parse_mode='Markdown')
 
 def check_message(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
@@ -83,13 +95,15 @@ def check_message(update: Update, context: CallbackContext):
     user_id = user.id
 
     # Stats üçün qeyd
-    if user_id not in stats:
-        stats[user_id] = [0, 0]
-    stats[user_id][0] += 1  # ümumi oyun sayı artır
+    if chat_id not in stats:
+        stats[chat_id] = {}
+    if user_id not in stats[chat_id]:
+        stats[chat_id][user_id] = [0, 0]
+    stats[chat_id][user_id][0] += 1  # ümumi oyun sayı artır
 
     if user_text == target_words.get(chat_id, "").lower():
         scores[user_id] = scores.get(user_id, 0) + 1
-        stats[user_id][1] += 1  # düzgün cavab sayı artır
+        stats[chat_id][user_id][1] += 1  # düzgün cavab sayı artır
         update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user_id]}")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
