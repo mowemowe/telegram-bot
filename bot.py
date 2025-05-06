@@ -2,7 +2,7 @@ import random
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-TOKEN = '8121790668:AAHrVXS93VtY9pVmy-LsKERNG8rz56kGwQs'
+TOKEN = '8121790668:AAGZtaXLTViBIw9hfEHe4bnIO4xbEH-3iXk'
 
 WORDS = ['alma', 'çətir', 'kompyuter', 'pəncərə', 'dəftər', 'açar', 'oyuncaq', 'elektrikləşdirilmişdərdənsinizmi',
          'qələm', 'divar', 'telefon', 'çay', 'ayna', 'kitabxana', 'dəli', 'kəpənək', 'sevgi', 'bulud', 'ulduz',
