@@ -15,6 +15,7 @@ target_words = {}
 last_words = {}
 scores = {}
 inactivity_timers = {}
+stats = {}  # user_id: [ümumi oyun sayı, düzgün cavab sayı]
 
 def get_new_word(chat_id):
     last_word = last_words.get(chat_id)
@@ -64,15 +65,32 @@ def top(update: Update, context: CallbackContext):
         leaderboard += f"{i}. {user.first_name} — {score} xal\n"
     update.message.reply_text(leaderboard)
 
+def show_stats(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
+    if user_id not in stats:
+        update.message.reply_text("Hələ heç bir oyunda iştirak etməmisən.")
+        return
+    total, correct = stats[user_id]
+    percent = int((correct / total) * 100) if total > 0 else 0
+    update.message.reply_text(f"Oyun sayı: {total}\nDüzgün cavab: {correct}\nDəqiqlik: {percent}%")
+
 def check_message(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     if not game_active.get(chat_id, False):
         return
     user_text = update.message.text.strip().lower()
+    user = update.message.from_user
+    user_id = user.id
+
+    # Stats üçün qeyd
+    if user_id not in stats:
+        stats[user_id] = [0, 0]
+    stats[user_id][0] += 1  # ümumi oyun sayı artır
+
     if user_text == target_words.get(chat_id, "").lower():
-        user = update.message.from_user
-        scores[user.id] = scores.get(user.id, 0) + 1
-        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user.id]}")
+        scores[user_id] = scores.get(user_id, 0) + 1
+        stats[user_id][1] += 1  # düzgün cavab sayı artır
+        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user_id]}")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
         update.message.reply_text(f"Növbəti söz: '{word}'")
@@ -98,6 +116,7 @@ def main():
     dp.add_handler(CommandHandler("saxla", stop))
     dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("top", top))
+    dp.add_handler(CommandHandler("tarixce", show_stats))  # yeni əmr
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_message))
     updater.start_polling()
     updater.idle()
