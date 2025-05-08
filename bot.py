@@ -17,7 +17,7 @@ last_words = {}
 scores = {}
 inactivity_timers = {}
 stats = {}
-start_times = {}  # chat_id: zaman damğası
+start_times = {}
 
 def get_new_word(chat_id):
     last_word = last_words.get(chat_id)
@@ -109,8 +109,6 @@ def check_message(update: Update, context: CallbackContext):
         target_words[chat_id] = word
         start_times[chat_id] = time.time()
         update.message.reply_text(f"Növbəti söz: '{word}'")
-    else:
-        update.message.reply_text("Yanlışdır! Sözü düz yaz!")
     reset_inactivity_timer(update, context)
 
 def stop_due_to_inactivity(context: CallbackContext):
