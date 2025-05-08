@@ -105,6 +105,13 @@ def check_message(update: Update, context: CallbackContext):
         scores[user_id] = scores.get(user_id, 0) + 1
         stats[chat_id][user_id][1] += 1
         update.message.reply_text(f"Təbriklər, {user.first_name} qazandı! ({duration} saniyəyə)\nÜmumi xalların: {scores[user_id]}")
+
+        username = user.username or user.first_name
+        context.bot.send_message(
+            chat_id=chat_id,
+            text=f"⭐ Günün ulduzu: @{username} — bu raundda ən sürətli cavab verdi!"
+        )
+
         word = get_new_word(chat_id)
         target_words[chat_id] = word
         start_times[chat_id] = time.time()
