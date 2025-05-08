@@ -1,6 +1,6 @@
 import random
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 
 TOKEN = '8121790668:AAGZtaXLTViBIw9hfEHe4bnIO4xbEH-3iXk'
 
@@ -15,7 +15,7 @@ target_words = {}
 last_words = {}
 scores = {}
 inactivity_timers = {}
-stats = {}  # chat_id: {user_id: [ümumi oyun sayı, düzgün cavab sayı]}
+stats = {}
 
 def get_new_word(chat_id):
     last_word = last_words.get(chat_id)
@@ -70,10 +70,8 @@ def show_stats(update: Update, context: CallbackContext):
     if chat_id not in stats or not stats[chat_id]:
         update.message.reply_text("Bu söhbətdə hələ heç kim iştirak etməyib.")
         return
-
     user_stats = stats[chat_id]
     sorted_stats = sorted(user_stats.items(), key=lambda x: x[1][1], reverse=True)
-
     text = "📊 *Qrup Statistikası:*\n"
     for i, (user_id, (total, correct)) in enumerate(sorted_stats, 1):
         percent = int((correct / total) * 100) if total > 0 else 0
@@ -83,7 +81,6 @@ def show_stats(update: Update, context: CallbackContext):
         except:
             name = f"ID:{user_id}"
         text += f"{i}. {name} — {correct} düzgün / {total} cəmi ({percent}%)\n"
-
     update.message.reply_text(text, parse_mode='Markdown')
 
 def check_message(update: Update, context: CallbackContext):
@@ -93,17 +90,14 @@ def check_message(update: Update, context: CallbackContext):
     user_text = update.message.text.strip().lower()
     user = update.message.from_user
     user_id = user.id
-
-    # Stats üçün qeyd
     if chat_id not in stats:
         stats[chat_id] = {}
     if user_id not in stats[chat_id]:
         stats[chat_id][user_id] = [0, 0]
-    stats[chat_id][user_id][0] += 1  # ümumi oyun sayı artır
-
+    stats[chat_id][user_id][0] += 1
     if user_text == target_words.get(chat_id, "").lower():
         scores[user_id] = scores.get(user_id, 0) + 1
-        stats[chat_id][user_id][1] += 1  # düzgün cavab sayı artır
+        stats[chat_id][user_id][1] += 1
         update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user_id]}")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
@@ -123,6 +117,37 @@ def reset_inactivity_timer(update: Update, context: CallbackContext):
         inactivity_timers[chat_id].schedule_removal()
     inactivity_timers[chat_id] = context.job_queue.run_once(stop_due_to_inactivity, 600, context=chat_id)
 
+def menu(update: Update, context: CallbackContext):
+    keyboard = [
+        [InlineKeyboardButton("🚀 Oyuna Başla", callback_data='basla'),
+         InlineKeyboardButton("⛔ Oyunu Saxla", callback_data='saxla')],
+        [InlineKeyboardButton("📊 Xal Cədvəli", callback_data='top'),
+         InlineKeyboardButton("ℹ️ Status", callback_data='status')],
+        [InlineKeyboardButton("🧠 Statistikalar", callback_data='tarixce')],
+        [InlineKeyboardButton("❌ Bağla", callback_data='close')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text("⚙️ *Ayarlar Menyusu:*", reply_markup=reply_markup, parse_mode='Markdown')
+
+def button_handler(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
+    data = query.data
+    fake_update = Update(update.update_id, message=query.message)
+
+    if data == 'basla':
+        start(fake_update, context)
+    elif data == 'saxla':
+        stop(fake_update, context)
+    elif data == 'status':
+        status(fake_update, context)
+    elif data == 'top':
+        top(fake_update, context)
+    elif data == 'tarixce':
+        show_stats(fake_update, context)
+    elif data == 'close':
+        query.edit_message_text("✅ Menyu bağlandı.")
+
 def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
@@ -130,7 +155,9 @@ def main():
     dp.add_handler(CommandHandler("saxla", stop))
     dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("top", top))
-    dp.add_handler(CommandHandler("tarixce", show_stats))  # yeni əmr
+    dp.add_handler(CommandHandler("tarixce", show_stats))
+    dp.add_handler(CommandHandler("menu", menu))  # yeni menyu
+    dp.add_handler(CallbackQueryHandler(button_handler))  # menyu düymələri
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_message))
     updater.start_polling()
     updater.idle()
