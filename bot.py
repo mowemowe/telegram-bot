@@ -1,4 +1,5 @@
 import random
+import time
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 
@@ -16,6 +17,7 @@ last_words = {}
 scores = {}
 inactivity_timers = {}
 stats = {}
+start_times = {}  # chat_id: zaman damğası
 
 def get_new_word(chat_id):
     last_word = last_words.get(chat_id)
@@ -34,6 +36,7 @@ def start(update: Update, context: CallbackContext):
         game_active[chat_id] = True
         word = get_new_word(chat_id)
         target_words[chat_id] = word
+        start_times[chat_id] = time.time()
         update.message.reply_text(f"Tez tap: '{word}' sözünü ən birinci yaz!")
         reset_inactivity_timer(update, context)
     else:
@@ -96,11 +99,15 @@ def check_message(update: Update, context: CallbackContext):
         stats[chat_id][user_id] = [0, 0]
     stats[chat_id][user_id][0] += 1
     if user_text == target_words.get(chat_id, "").lower():
+        end_time = time.time()
+        duration = round(end_time - start_times.get(chat_id, end_time), 2)
+
         scores[user_id] = scores.get(user_id, 0) + 1
         stats[chat_id][user_id][1] += 1
-        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı!\nÜmumi xalların: {scores[user_id]}")
+        update.message.reply_text(f"Təbriklər, {user.first_name} qazandı! ({duration} saniyəyə)\nÜmumi xalların: {scores[user_id]}")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
+        start_times[chat_id] = time.time()
         update.message.reply_text(f"Növbəti söz: '{word}'")
     else:
         update.message.reply_text("Yanlışdır! Sözü düz yaz!")
@@ -134,7 +141,6 @@ def button_handler(update: Update, context: CallbackContext):
     query.answer()
     data = query.data
     fake_update = Update(update.update_id, message=query.message)
-
     if data == 'basla':
         start(fake_update, context)
     elif data == 'saxla':
@@ -156,8 +162,8 @@ def main():
     dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("top", top))
     dp.add_handler(CommandHandler("tarixce", show_stats))
-    dp.add_handler(CommandHandler("menu", menu))  # yeni menyu
-    dp.add_handler(CallbackQueryHandler(button_handler))  # menyu düymələri
+    dp.add_handler(CommandHandler("menu", menu))
+    dp.add_handler(CallbackQueryHandler(button_handler))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, check_message))
     updater.start_polling()
     updater.idle()
