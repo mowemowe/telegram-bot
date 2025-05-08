@@ -3,7 +3,7 @@ import time
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 
-TOKEN = '8121790668:AAGZtaXLTViBIw9hfEHe4bnIO4xbEH-3iXk'
+TOKEN = '8121790668:AAFRciXl87HahPfuF19M0eXaW5yAi8BaYv8'
 
 WORDS = ['alma', 'çətir', 'kompyuter', 'pəncərə', 'dəftər', 'açar', 'oyuncaq', 'elektrikləşdirilmişdərdənsinizmi',
          'qələm', 'divar', 'telefon', 'çay', 'ayna', 'kitabxana', 'dəli', 'kəpənək', 'sevgi', 'bulud', 'ulduz',
