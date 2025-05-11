@@ -35,6 +35,8 @@ def start(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     text = update.message.text.lower()
     if contains_blocked_content(text):
+        try: update.message.delete()
+        except: pass
         return
     if not game_active.get(chat_id, False):
         game_active[chat_id] = True
@@ -92,6 +94,8 @@ def show_stats(update: Update, context: CallbackContext):
 
 def check_message(update: Update, context: CallbackContext):
     if contains_blocked_content(update.message.text):
+        try: update.message.delete()
+        except: pass
         return
     chat_id = update.effective_chat.id
     if not game_active.get(chat_id, False):
@@ -107,17 +111,11 @@ def check_message(update: Update, context: CallbackContext):
     if user_text == target_words.get(chat_id, "").lower():
         end_time = time.time()
         duration = round(end_time - start_times.get(chat_id, end_time), 2)
-
         scores[user_id] = scores.get(user_id, 0) + 1
         stats[chat_id][user_id][1] += 1
         update.message.reply_text(f"Təbriklər, {user.first_name} qazandı! ({duration} saniyəyə)\nÜmumi xalların: {scores[user_id]}")
-
         username = user.username or user.first_name
-        context.bot.send_message(
-            chat_id=chat_id,
-            text=f"⭐ Günün ulduzu: @{username} — bu raundda ən sürətli cavab verdi!"
-        )
-
+        context.bot.send_message(chat_id=chat_id, text=f"⭐ Günün ulduzu: @{username} — bu raundda ən sürətli cavab verdi!")
         word = get_new_word(chat_id)
         target_words[chat_id] = word
         start_times[chat_id] = time.time()
@@ -137,8 +135,9 @@ def reset_inactivity_timer(update: Update, context: CallbackContext):
 
 def menu(update: Update, context: CallbackContext):
     if contains_blocked_content(update.message.text):
+        try: update.message.delete()
+        except: pass
         return
-
     keyboard = [
         [InlineKeyboardButton("🚀 Oyuna Başla", callback_data='basla'),
          InlineKeyboardButton("⛔ Oyunu Saxla", callback_data='saxla')],
