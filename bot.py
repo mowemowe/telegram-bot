@@ -19,6 +19,10 @@ inactivity_timers = {}
 stats = {}
 start_times = {}
 
+def contains_blocked_content(text):
+    blocked_keywords = ["vpn", "arturshi", "jetonvpn", ".ru", "bit.ly", "http", "https", "t.me/"]
+    return any(bad in text.lower() for bad in blocked_keywords)
+
 def get_new_word(chat_id):
     last_word = last_words.get(chat_id)
     new_word = random.choice(WORDS)
@@ -30,7 +34,7 @@ def get_new_word(chat_id):
 def start(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     text = update.message.text.lower()
-    if any(bad in text for bad in ["vpn", "bit.ly", "t.me/vpn", "http", "https"]):
+    if contains_blocked_content(text):
         return
     if not game_active.get(chat_id, False):
         game_active[chat_id] = True
@@ -87,6 +91,8 @@ def show_stats(update: Update, context: CallbackContext):
     update.message.reply_text(text, parse_mode='Markdown')
 
 def check_message(update: Update, context: CallbackContext):
+    if contains_blocked_content(update.message.text):
+        return
     chat_id = update.effective_chat.id
     if not game_active.get(chat_id, False):
         return
@@ -130,6 +136,9 @@ def reset_inactivity_timer(update: Update, context: CallbackContext):
     inactivity_timers[chat_id] = context.job_queue.run_once(stop_due_to_inactivity, 600, context=chat_id)
 
 def menu(update: Update, context: CallbackContext):
+    if contains_blocked_content(update.message.text):
+        return
+
     keyboard = [
         [InlineKeyboardButton("🚀 Oyuna Başla", callback_data='basla'),
          InlineKeyboardButton("⛔ Oyunu Saxla", callback_data='saxla')],
